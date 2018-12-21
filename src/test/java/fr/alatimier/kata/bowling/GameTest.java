@@ -110,6 +110,18 @@ class GameTest {
         Assertions.assertEquals(30, score);
     }
 
+    @Test
+    void highest_score_should_be_300() {
+        // Given
+        playManyFrames(12, 10, 0);
+
+        // When
+        int score = game.getScore();
+
+        // Then
+        Assertions.assertEquals(300, score);
+    }
+
     private void playStrike() {
         playFrame(10, 0);
     }

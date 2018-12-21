@@ -16,6 +16,11 @@ class GameTest {
     }
 
     @Test
+    void a_game_should_not_contains_more_than_twelve_frames() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> playManyFrames(13, 0, 0));
+    }
+
+    @Test
     void the_score_of_a_game_full_without_strike_nor_spare_should_be_a_simple_sum() {
         // Given
         playManyFrames(10, 1, 1);

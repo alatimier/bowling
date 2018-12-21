@@ -2,7 +2,7 @@ package fr.alatimier.kata.bowling;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.IntStream;
 
 class Game {
 
@@ -11,67 +11,43 @@ class Game {
     private List<Frame> frames = new LinkedList<>();
 
     void playFrame(Frame frame) {
-        if (frames.size() == FRAME_NB + 2) {
-            throw new IllegalArgumentException("Game is over");
-        }
         frames.add(frame);
     }
 
     int getScore() {
-        int score = 0;
-        int currentIndex = 0;
-        for (Frame frame : frames) {
-            if (!isBonusRoll(currentIndex)) {
-                score += frame.getNbPinsDown();
-                if (frame.isStrike()) {
-                    score += getStrikeBonus(currentIndex);
-                } else if (frame.isSpare()) {
-                    score += getSpareBonus(currentIndex);
-                }
-            }
-            currentIndex++;
-        }
-        return score;
+        return IntStream
+                .range(0, FRAME_NB)
+                .reduce(0, (score, index) -> score + getFrameAtIndex(index).getNbPinsDown() + getFrameBonus(index));
     }
 
-    private boolean isBonusRoll(int currentIndex) {
-        return currentIndex >= FRAME_NB;
+    private int getFrameBonus(int frameIndex) {
+        Frame frame = getFrameAtIndex(frameIndex);
+        if (frame.isStrike()) {
+            return getStrikeBonus(frameIndex);
+        } else if (frame.isSpare()) {
+            return getSpareBonus(frameIndex);
+        }
+        return 0;
     }
 
     private int getStrikeBonus(int index) {
-        Optional<Frame> nextFrame = getFrameAtIndex(index + 1);
-
-        if (!nextFrame.isPresent()) {
-            throw new IllegalStateException("Frame sequence is erroneous...");
-        }
-
-        if (nextFrame.get().isStrike()) {
-            Optional<Frame> nextNextFrame = getFrameAtIndex(index + 2);
-            if (!nextNextFrame.isPresent()) {
-                throw new IllegalStateException("Frame sequence is erroneous...");
-            }
-            return nextFrame.get().getNbPinsDown() + nextNextFrame.get().getNbPinsDownAtFirstRoll();
+        Frame nextFrame = getFrameAtIndex(index + 1);
+        if (nextFrame.isStrike()) {
+            return nextFrame.getNbPinsDown() + getFrameAtIndex(index + 2).getNbPinsDownAtFirstRoll();
         } else {
-            return nextFrame.get().getNbPinsDown();
+            return nextFrame.getNbPinsDown();
         }
-
     }
 
     private int getSpareBonus(int index) {
-        Optional<Frame> nextFrame = getFrameAtIndex(index + 1);
-
-        if (!nextFrame.isPresent()) {
-            throw new IllegalStateException("Frame sequence is erroneous...");
-        }
-
-        return nextFrame.get().getNbPinsDownAtFirstRoll();
+        return getFrameAtIndex(index + 1).getNbPinsDownAtFirstRoll();
     }
 
-    private Optional<Frame> getFrameAtIndex(int index) {
+    private Frame getFrameAtIndex(int index) {
         if (index + 1 <= frames.size()) {
-            return Optional.of(frames.get(index));
+            return frames.get(index);
         }
-        return Optional.empty();
+        throw new IllegalStateException("Frame " + index + " is missing...");
     }
 
 }

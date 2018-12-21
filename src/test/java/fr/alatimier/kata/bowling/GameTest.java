@@ -16,12 +16,7 @@ class GameTest {
     }
 
     @Test
-    void a_game_should_not_contains_more_than_twelve_frames() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> playManyFrames(13, 0, 0));
-    }
-
-    @Test
-    void the_score_of_a_game_full_without_strike_nor_spare_should_be_a_simple_sum() {
+    void the_score_of_a_game_without_strike_nor_spare_should_be_a_simple_sum() {
         // Given
         playManyFrames(10, 1, 1);
 
@@ -59,32 +54,17 @@ class GameTest {
     }
 
     @Test
-    void a_strike_on_frames_ten_should_grant_exactly_two_bonus_rolls_even_with_strikes_in_bonus() {
+    void a_spare_on_frames_ten_should_grant_one_bonus_roll() {
         // Given
         playManyFrames(9, 1, 1);
-        playStrike();
-        playStrike();
-        playStrike();
-
-        // When
-        int score = game.getScore();
-
-        // Then
-        Assertions.assertEquals(48, score);
-    }
-
-    @Test
-    void a_strike_on_frames_ten_should_grant_exactly_two_bonus_rolls_even_with_spare_in_bonus() {
-        // Given
-        playManyFrames(9, 1, 1);
-        playStrike();
         playSpare();
+        playFrame(2, 0);
 
         // When
         int score = game.getScore();
 
         // Then
-        Assertions.assertEquals(38, score);
+        Assertions.assertEquals(30, score);
     }
 
     @Test
@@ -102,17 +82,32 @@ class GameTest {
     }
 
     @Test
-    void a_spare_on_frames_ten_should_grant_one_bonus_roll() {
+    void a_strike_in_bonus_rolls_should_not_be_handled_as_strike() {
         // Given
         playManyFrames(9, 1, 1);
-        playSpare();
-        playFrame(2, 0);
+        playStrike();
+        playStrike();
+        playStrike();
 
         // When
         int score = game.getScore();
 
         // Then
-        Assertions.assertEquals(30, score);
+        Assertions.assertEquals(48, score);
+    }
+
+    @Test
+    void a_spare_in_bonus_rolls_should_not_be_handled_as_spare() {
+        // Given
+        playManyFrames(9, 1, 1);
+        playStrike();
+        playSpare();
+
+        // When
+        int score = game.getScore();
+
+        // Then
+        Assertions.assertEquals(38, score);
     }
 
     @Test
